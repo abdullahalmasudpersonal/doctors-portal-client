@@ -18,6 +18,7 @@ const Dashbord = () => {
                     <li><Link to='/dashbord'>My Appointment</Link> </li>
                     <li><Link to='/dashbord/review'>My Reviews</Link> </li>
                     <li><Link to='/dashbord/history'>My History</Link> </li>
+                    <li><Link to='/dashbord/allusers'>All Users</Link> </li>
                 </ul>
 
             </div>
