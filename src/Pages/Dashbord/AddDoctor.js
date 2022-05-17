@@ -1,11 +1,44 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
+import { useQuery } from 'react-query';
+import Loading from '../Login/Loading';
 
 const AddDoctor = () => {
     const { register, formState: { errors }, handleSubmit } = useForm();
 
+    const { data: services, isLoading } = useQuery('services', () => fetch('http://localhost:5000/service').then(res => res.json()));
+
+    const imageStorageKey='970580c82b09310dfeffa683999d7f1c';
+
+
     const onSubmit = async data => {
-        console.log('done', data); 
+        const image = data.image[0];
+        const formData = new FormData();
+        formData.append('image', image);
+        const url = `https://api.imgbb.com/1/upload?key=${imageStorageKey}`;
+        fetch(url, {
+            method: 'POST',
+            body: formData
+        })
+        .then(res =>res.json())
+        .then(result =>{
+           if(result.success){
+               const img = result.data.url;
+               const doctor ={
+                   name: data.name,
+                   email: data.email,
+                   specialty: data.specialty,
+                   img: img
+               }
+               // send to your database
+               
+           } 
+            console.log('imagebb',result);
+        })
+    }
+
+    if (isLoading) {
+        return <Loading />
     }
 
     return (
@@ -17,7 +50,7 @@ const AddDoctor = () => {
                     <label className="label">
                         <span className="label-text">Name</span>
                     </label>
-                    <input type="name"
+                    <input type="text"
                         placeholder="Enter name"
                         className="input input-bordered w-full max-w-xs"
                         {...register("name", {
@@ -60,19 +93,31 @@ const AddDoctor = () => {
                     <label className="label">
                         <span className="label-text">Specialty</span>
                     </label>
-                    <input type="text"
-                        placeholder="specialty"
+                    <select {...register('specialty')} className="select input-bordered w-full max-w-xs">
+                        {
+                            services.map(service=><option
+                            key={service._id}
+                            value={service.name}
+                            >{service.name}</option>)
+                        }
+                    </select>
+                </div>
+
+                <div className="form-control w-full max-w-xs">
+                    <label className="label">
+                        <span className="label-text">Photo</span>
+                    </label>
+                    <input type="file"
                         className="input input-bordered w-full max-w-xs"
-                        {...register("specialty", {
+                        {...register("image", {
                             required: {
                                 value: true,
-                                message: 'Specialization is Required'
+                                message: 'Image is Required'
                             }
                         })}
                     />
                     <label className="label">
-                        {errors.password?.type === 'required' && <span className='label-text-alt text-red-500 '>{errors.password.message}</span>}
-                        {errors.password?.type === 'minLength' && <span className='label-text-alt text-red-500 '>{errors.password.message}</span>}
+                        {errors.name?.type === 'required' && <span className='label-text-alt text-red-500 '>{errors.name.message}</span>}
                     </label>
                 </div>
 
